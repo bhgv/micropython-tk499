@@ -1,3 +1,267 @@
+port for tk499 with 5" screen with RGB interface and ft54x6 capasitive touchscreen
+
+How to build:
+=============
+```
+cd mpy-cross
+make
+
+cd ../ports/tk499-5i-rgb
+make submodules
+make
+```
+
+ROM to upload:
+--------------
+```
+ports/tk499-5i-rgb/build-TKM32/firmware.bin
+```
+
+How to upload:
+-------------
+connect your tk499 board with USB cable to your computer, press buttons "BOOT" and "RESET" on the board. release "RESET" button. AFTER, release "BOOT" button.
+
+on your computer should appear new USB disk "TK499". just copy your compiled ROM there. after flashing this disk  will disappear.
+
+connect with your prefered terminal to /dev/ttyACM0 (or 1, 2, 3.. if you have many ttyACM devices), 115200, 8, 1
+
+now you have micropython console.
+
+or you may use `Thonny` python editor with support of remote micropython
+
+Quick start (translation from chinese):
+=======================================
+
+
+Delay and time
+-----------
+Use the timemodule:
+```
+import time
+
+time.sleep(1)           # sleep for 1 second
+time.sleep_ms(500)      # Sleep for 500 milliseconds
+time.sleep_us(10)       # Sleep 10 subtle
+start = time.ticks_ms() # Get the millisecond timer start value
+delta = time.ticks_diff(time.ticks_ms(), start) # Calculate the difference from the start to the current time
+```
+
+Timer
+-----
+TKM32F499 has 10 hardware timers. Use the machine.Timer class by setting the timer ID number to 1-10
+```
+from machine import Timer
+
+tim0 = Timer(1)
+tim0.init(period=5000, mode=Timer.ONE_SHOT, callback=lambda t:print(0))
+
+tim1 = Timer(2)
+tim1.init(period=2000, mode=Timer.PERIODIC, callback=lambda t:print(1))
+```
+The unit of this period is milliseconds (ms), and virtual timers are temporarily not supported: id=-1.
+
+Pins and GPIO ports
+-------------------
+Use machine.Pin module:
+```
+from machine import Pin
+
+p0 = Pin('C4', Pin.OUT)             # Create object p0, corresponding to C4 output
+p0.on()                             # Set the pin to "on" (1) high level
+p0.off()                            # Set the pin to "off" (0) low level
+p0.value(1)                         # Set the pin to "on" (1) high level
+
+p2 = Pin('A0', Pin.IN)              # Create object p2, corresponding to A0 port input
+print(p2.value())                   # Get the pin input value, 0 (low level) or 1 (high level)
+
+p4 = Pin('C6', Pin.IN, Pin.PULL_UP) # Turn on the internal pull-up resistor
+p5 = Pin('C7', Pin.OUT, value=1)    # Set the pin value to 1 (high level) during initialization
+```
+TKM32F499 pins use the same naming method as the chip pins, such as PA0–>'A0', PC4–>'C4'. Please refer to its schematic diagram for details.
+ADC (Analog to Digital Conversion)
+
+TKM32F499 has a total of 6 ADCs, the corresponding pins are'ADC_4','ADC_5','B0','B1','B2','B3'. Please note that the input voltage on the ADC pin must be between 0.0v Between and 3.3v (corresponding value is 0-4095).
+
+Use the machine.ADC class:
+---------------------------
+```
+from machine import ADC
+
+adc = ADC('ADC_4') # Create ADC object on ADC_4 pin
+adc.read_16()      # Read the measured value, 0-4095 means the voltage is from 0.0v-3.3v
+```
+
+Software SPI bus
+----------------
+There are two SPI drivers inside EPS32. One of them is realized by software (bit-banging), and allows configuration to all pins, configured by machine.SoftSPI type module:
+```
+from machine import Pin, SoftSPI
+
+# Create a SoftSPI bus on the given pin
+# (Polarity) polarity refers to the state of SCK when it is idle
+# (Phase) phase=0 means SCK starts sampling at the first edge, phase=1 means it starts at the second edge.
+spi = SoftSPI(baudrate=100000, polarity=1, phase=0, sck=Pin(0), mosi=Pin(2), miso=Pin(4))
+
+spi.init(baudrate=200000)        # set frequency
+
+spi.read(10)                     # read 10 bytes of data on the MISO pin
+spi.read(10, 0xff)               # read 10 bytes of data on the MISO pin and output 0xff on the MOSI
+
+buf = bytearray(50)              # Create a buffer
+spi.readinto(buf)                # read the data and store it in the buffer (here 50 bytes are read)
+spi.readinto(buf, 0xff)          # Read the data and store it in the buffer, while outputting 0xff in MOSI
+
+spi.write(b'12345')              # Write 5 bytes of data on the MOSI pin
+
+buf = bytearray(4)               # Create buffer
+spi.write_readinto(b'1234', buf) # Write data on the MOSI pin and store the MISO read data in the buffer
+spi.write_readinto(buf, buf)     # Write the data in the buffer on the MOSI pin and store the MISO read data in the buffe
+```
+
+*Warning*
+
+Currently when creating software SPI object sck, mosiand miso all the pins must be defined.
+
+Hardware SPI bus
+----------------
+There are two hardware SPI channels allowing higher rate transfers. It can also be configured as any pin, but the relevant pins must conform to the directionality of input and output, which can be referred to (see pins and GPIO ports ). Using custom pins instead of default pins will reduce the transmission speed, and the upper limit is 40MHz. The following are the default pins of the hardware SPI bus:
+
+|      | HSPI (id=1) | VSPI (id=2) |
+------------------------------------
+| sck  | B2          | A5          |
+| mosi | B0          | A7          |
+| miso | B1          | A6          |
+
+
+Hardware SPI is accessed via the machine.SPI class and has the same methods as software SPI above:
+```
+from machine import Pin, SPI
+
+hspi = SPI(1, 10000000)
+vspi = SPI(2, baudrate=80000000, polarity=0, phase=0, bits=8, firstbit=0)
+```
+
+SoftI2C bus
+-----------
+The I2C bus is divided into software and hardware objects. The hardware can define 0 and 1, and the function can be changed on any pin through configuration. For details, please see the machine.SoftI2C module:
+```
+from machine import Pin, SoftI2C
+
+# Build 1 I2C object
+i2c = SoftI2C(scl=Pin(5), sda=Pin(4), freq=100000)
+
+# Build a hardware I2C bus
+i2c = I2C(0)
+i2c = I2C(1, scl=Pin(5), sda=Pin(4), freq=400000)
+
+i2c.scan()              # Scan the slave device
+
+i2c.readfrom(0x3a, 4)   # read 4 bytes of data from the slave device with address 0x3a
+i2c.writeto(0x3a, '12') # write data "12" to the slave device with address 0x3a
+
+buf = bytearray(10)     # Create a 10-byte buffer
+i2c.writeto(0x3a, buf)  # Write buffer data to slave 
+```
+
+Hardware I2C bus
+----------------
+There are two hardware I2C peripherals with identifiers 0 and 1. Any available output-capable pins can be used for SCL and SDA but the defaults are given below.
+
+|       | I2C(1) | I2C(3) |
+----------------------------
+| scl   | B2     | C1     |
+| sda   | B0     | C0     |
+
+The driver is accessed via the machine.I2C class and has the same methods as software I2C above:
+```
+from machine import Pin, I2C
+
+i2c = I2C(0)
+```
+
+Real Time Clock (RTC)
+---------------------
+(See machine.RTC)
+```
+from machine import RTC
+
+rtc = RTC()
+rtc.datetime((2017, 8, 23, 1, 12, 48, 0, 0)) # Set time (year, month, day, week, hour, minute, second, microsecond)
+                                             # Where the week uses 0-6 to indicate Monday to Sunday.
+rtc.datetime()                               # Get the current date and time 
+```
+
+DHT driver
+----------
+DHT temperature and humidity drive allows to realize on each pin through software:
+```
+import dht
+import machine
+
+d = dht.DHT11(machine.Pin(4))
+d.measure()
+d.temperature() # eg. 23 (°C)
+d.humidity()    # eg. 41 (% RH)
+
+d = dht.DHT22(machine.Pin(4))
+d.measure()
+d.temperature() # eg. 23.6 (°C)
+d.humidity()    # eg. 41.3 (% RH)
+```
+
+Network
+-------
+(For details, please refer to network.ESP8266)
+```
+import network
+from machine import UART
+
+uart = UART(1,115200)
+wlan = network.ESP8266(uart)     # Create station interface
+wlan.connect('essid','password') # connect to the specified WiFi network
+wlan.ifconfig()                  # Get the IP/netmask (subnet mask)/gw (gateway)/DNS address of the interface 
+```
+
+Once the network is established, you can socketcreate a module and use TCP / UDP sockets communications, as well as by urequestssending an HTTP request module easily.
+
+4.3" (or 5") RGB display
+------------------------
+(Please refer to tftlcd.LCD43R and touch.FT5436)
+
+LCD routine:
+```
+import tftlcd
+
+d = tftlcd.LCD43R(portrait=1)                  #Build LCD object
+d.fill((255, 255, 255))                        #fill white
+d.drawRect(0, 0, 100, 100, (255,0,0))          #Draw a red rectangle
+d.printStr('Hello 01Studio!', 0, 0, (0,255,0)) #write characters
+d.Picture(0, 0,'/flash/curry.jpg')             #display picture 
+```
+
+Touch routine:
+```
+import touch
+
+t = touch.FT5436(portrait=1) #Build a touch screen object
+t.read()                     #Get touch status and coordinates 
+```
+
+GUI-touch button
+----------------
+The TouchButton class provides a touch button control interface. By constructing this object, you can easily display touch button applications. For details, please refer to gui.TouchButton.
+
+Example:
+```
+import gui
+
+B1 = gui.TouchButton(0,0,120,80,(255,0,0),'LED3',(255,255,255),fun1) #Build a button
+print(B1.ID())                                                       #Print button number 
+```
+
+
+
+
 [![CI badge](https://github.com/micropython/micropython/workflows/unix%20port/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![Coverage badge](https://coveralls.io/repos/micropython/micropython/badge.png?branch=master)](https://coveralls.io/r/micropython/micropython?branch=master)
 
 The MicroPython project
