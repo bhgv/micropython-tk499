@@ -127,7 +127,7 @@ Hardware SPI bus
 There are two hardware SPI channels allowing higher rate transfers. It can also be configured as any pin, but the relevant pins must conform to the directionality of input and output, which can be referred to (see pins and GPIO ports ). Using custom pins instead of default pins will reduce the transmission speed, and the upper limit is 40MHz. The following are the default pins of the hardware SPI bus:
 
 |      | HSPI (id=1) | VSPI (id=2) |
-------------------------------------
+|------|-------------|-------------|
 | sck  | B2          | A5          |
 | mosi | B0          | A7          |
 | miso | B1          | A6          |
@@ -168,7 +168,7 @@ Hardware I2C bus
 There are two hardware I2C peripherals with identifiers 0 and 1. Any available output-capable pins can be used for SCL and SDA but the defaults are given below.
 
 |       | I2C(1) | I2C(3) |
-----------------------------
+|-------|--------|--------|
 | scl   | B2     | C1     |
 | sda   | B0     | C0     |
 
