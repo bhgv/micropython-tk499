@@ -222,10 +222,10 @@ Network
 import network
 from machine import UART
 
-uart = UART(1,115200)
-wlan = network.ESP8266(uart)     # Create station interface
-wlan.connect('essid','password') # connect to the specified WiFi network
-wlan.ifconfig()                  # Get the IP/netmask (subnet mask)/gw (gateway)/DNS address of the interface 
+uart = UART(2, 115200)
+wlan = network.ESP8266(uart)      # Create station interface
+wlan.connect('essid', 'password') # connect to the specified WiFi network
+wlan.ifconfig()                   # Get the IP/netmask (subnet mask)/gw (gateway)/DNS address of the interface 
 ```
 
 Once the network is established, you can socketcreate a module and use TCP / UDP sockets communications, as well as by urequestssending an HTTP request module easily.
