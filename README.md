@@ -6,7 +6,13 @@ How to build:
 cd mpy-cross
 make
 
+# for RGB-display 5" model
 cd ../ports/tk499-5i-rgb
+
+# OR
+# for MCU-888 (TK88) -display model
+cd ../ports/tk499-4.3i-mcu-lcd
+
 make submodules
 make
 ```
