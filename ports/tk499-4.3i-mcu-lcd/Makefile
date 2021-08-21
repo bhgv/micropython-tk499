@@ -1,7 +1,7 @@
 # Select the board to build for: if not given on the command line,
 # then default to PYBV10.
 BOARD ?= TKM32
-LVGL ?= 0
+LVGL ?= 1
 
 ifeq ($(LVGL),1)
 CFLAGS += -DMICROPY_PY_LVGL
@@ -41,6 +41,9 @@ include $(TOP)/py/py.mk
 TKM_LIB_DIR=tkm32lib
 
 GIT_SUBMODULES = lib/libhydrogen lib/lwip lib/mbedtls lib/mynewt-nimble
+ifeq ($(LVGL),1)
+GIT_SUBMODULES += lib/lv_bindings
+endif
 
 MCU_SERIES_UPPER = $(shell echo $(MCU_SERIES) | tr '[:lower:]' '[:upper:]')
 CMSIS_MCU_LOWER = $(shell echo $(CMSIS_MCU) | tr '[:upper:]' '[:lower:]')

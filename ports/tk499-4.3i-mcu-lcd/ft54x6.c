@@ -130,6 +130,7 @@ void touch_read_point(void)
     }
     pre_touch = touch_num;
 }
+
 /**********************************************************************************************************/
 void TIM8_Config(uint32_t freq)
 {
@@ -195,14 +196,22 @@ STATIC mp_obj_t touch_Ft54xx_read(void)
 {
 	mp_obj_t tuple[3];
 	touch_read_point();
-	if (tp_dev.sta&TP_PRES_DOWN) tuple[0] = mp_obj_new_int(0);
-	else if(tp_dev.sta&TP_PRES_MOVE)	tuple[0] = mp_obj_new_int(1); 
-	else 	tuple[0] = mp_obj_new_int(2); 
-		
+
+	if (tp_dev.sta & TP_PRES_DOWN)
+		tuple[0] = mp_obj_new_int(0);
+	else if(tp_dev.sta & TP_PRES_MOVE)
+		tuple[0] = mp_obj_new_int(1); 
+	else
+		tuple[0] = mp_obj_new_int(2); 
+
 	tuple[1] = mp_obj_new_int(tp_dev.x[0]);
 	tuple[2] = mp_obj_new_int(tp_dev.y[0]);
+
 	return mp_obj_new_tuple(3, tuple);
-}STATIC MP_DEFINE_CONST_FUN_OBJ_0(touch_Ft54xx_read_obj, touch_Ft54xx_read);
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(touch_Ft54xx_read_obj, touch_Ft54xx_read);
+
 //------------------------------------------------------------------------------------------------------
 STATIC mp_obj_t touch_ft54xx_scan(void)
 {

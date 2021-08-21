@@ -42,6 +42,3 @@
 [submodule "lib/pico-sdk"]
 	path = lib/pico-sdk
 	url = https://github.com/raspberrypi/pico-sdk.git
-[submodule "lib/lv_bindings"]
-	path = lib/lv_bindings
-	url = https://github.com/lvgl/lv_binding_micropython.git

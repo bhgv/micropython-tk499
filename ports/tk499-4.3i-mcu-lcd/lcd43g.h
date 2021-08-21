@@ -94,14 +94,15 @@ __attribute__ ((aligned (256))) uint32_t LTDC_Buf[X_PIXEL*Y_PIXEL/*+10*/];
 
 extern void lcd43g_init(void);
 extern void LCD_Display_Dir(uint8_t dir);
-extern void LCD_DisplayStr(uint16_t x,uint16_t y,uint16_t width,uint16_t height,uint8_t size,char *p,uint32_t color);
+extern void LCD_DisplayStr(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t size, char *p, uint32_t color);
 
 extern void LCD_Clear(uint32_t color);
 
-extern void LCD_Fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint32_t color);
-extern void LCD_Color_Fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16_t *color);
+extern void LCD_Fill(uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey, uint32_t color);
+extern void LCD_Fill_Pic(u16 x, u16 y, u16 pic_H, u16 pic_V, u32* pic);
+extern void LCD_Color_Fill(uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey, uint16_t *color);
 extern uint32_t LCD_ReadPoint(uint16_t x , uint16_t y);
-extern void LCD_Fast_DrawPoint(uint16_t x,uint16_t y,uint32_t color);
+extern void LCD_Fast_DrawPoint(uint16_t x, uint16_t y, uint32_t color);
 extern void LCD43G_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint32_t color);
 
 extern uint32_t get_rgb(uint8_t r_color, uint8_t g_color , uint8_t b_color);

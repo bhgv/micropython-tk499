@@ -75,18 +75,32 @@ STATIC mp_obj_t mp_lvlcd_deinit() {
     return mp_const_none;
 }
 
-STATIC void mp_lvlcd_flush(struct _disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
+STATIC void mp_lvlcd_flush(struct _lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 
 	int32_t x;
 	int32_t y;
 
+#if 0
 	for(y = area->y1; y <= area->y2 && y < disp_drv->ver_res; y++){
 		for(x = area->x1; x <= area->x2; x++){
-			LCD_Fast_DrawPoint(x,y,lv_color_to32(*color_p));
+			LCD_Fast_DrawPoint(x, y, lv_color_to32(*color_p));
 			//LTDC_Buf[lcddev.x_pixel*y+x] = lv_color_to32(*color_p);
 			color_p++;
 		}
 	}
+#else
+	int32_t i,
+			w = area->x2 - area->x1 + 1,
+			h = area->y2 - area->y1 + 1;
+
+//	for (i = 0, y = area->y1; y <= area->y2 && y < disp_drv->ver_res; y++, i++) {
+//		LCD_Fill_Pic(area->x1, y, w, 1, &color_p[i * w]);
+//	}
+
+	LCD_Fill_Pic(area->x1, area->y1, w, h, color_p);
+#endif
+
+	//printf("%s> %s:%d\n", __FILE__, __func__, __LINE__);
 	lv_disp_flush_ready(disp_drv);
 }
 
@@ -94,17 +108,21 @@ STATIC bool mp_lv_touch_read(struct _lv_indev_drv_t *indev_drv, lv_indev_data_t 
     static lv_coord_t lastX = 0;
     static lv_coord_t lastY = 0;
 
+    touch_read_point();
+
+//printf("%s> %s:%d tp_dev.sta=%d\n", __FILE__, __func__, __LINE__, tp_dev.sta);
+
 		// if(tp_dev.type == 1){
 			// touch_read_point();
 		// }else if(tp_dev.type == 2){
 			// gt911_read_point();
 		// }
-		if(tp_dev.sta&TP_PRES_DOWN || tp_dev.sta&TP_PRES_MOVE)
+		if(tp_dev.sta & TP_PRES_DOWN || tp_dev.sta & TP_PRES_MOVE)
 		{
 			lastX = tp_dev.x[0];
 			lastY = tp_dev.y[0];
 			data->state = LV_INDEV_STATE_PR;
-			// printf("lastX:%d,lastY:%d\r\n",lastX,lastY);
+			//printf("lastX: %d, lastY: %d\r\n", lastX, lastY);
 		}else{
 			data->state = LV_INDEV_STATE_REL;
 		}

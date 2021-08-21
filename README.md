@@ -265,7 +265,22 @@ B1 = gui.TouchButton(0,0,120,80,(255,0,0),'LED3',(255,255,255),fun1) #Build a bu
 print(B1.ID())                                                       #Print button number 
 ```
 
+LVGL widgets & GUI-system
+-------------------------
+```
+cd examples-tk499-lvgl
 
+lvgl_start.py  # initialise of screen, touch screen, LVGL.
+               # and it defines LVGL event_loop class
+
+button_lvgl.py # example: a LVGL-button. it uses lvgl_start.py to configure & run
+```
+
+more about micropython-LVGL
+---------------------------
+* https://github.com/lvgl/lv_binding_micropython
+* https://blog.lvgl.io/2019-02-20/micropython-bindings
+* https://blog.lvgl.io/2019-08-05/micropython-pure-display-driver
 
 
 [![CI badge](https://github.com/micropython/micropython/workflows/unix%20port/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![Coverage badge](https://coveralls.io/repos/micropython/micropython/badge.png?branch=master)](https://coveralls.io/r/micropython/micropython?branch=master)
