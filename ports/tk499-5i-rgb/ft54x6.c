@@ -64,7 +64,8 @@ STATIC void ft_Init(void)
 }
 //===============================================================================
 
-static uint16_t touch_w,touch_h;
+static uint16_t touch_w, touch_h;
+
 void touch_read_point(void)
 {
     uint8_t touch_num = 0;
@@ -88,6 +89,7 @@ void touch_read_point(void)
     }
 
     if (touch_num){	
+#if 0
       switch (4) //tp_dev.dir)
         {
           case 2:
@@ -107,6 +109,14 @@ void touch_read_point(void)
 						input_y = (uint16_t)(X_PIXEL - (((read_buf[2] & 0x0F)<<8) + read_buf[3]));
           break;
         }
+#endif
+
+		input_y = (uint16_t)( ((read_buf[4] & 0x0F)<<8) + read_buf[5]);
+		input_x = (uint16_t)( ((read_buf[2] & 0x0F)<<8) + read_buf[3]);
+
+		//if(input_y >= 0 && input_y <= touch_h){
+		//	input_y = Y_PIXEL - input_y;
+		//}
 
 				//printf("lcddev.dir:%d,x:%d,,y:%d\r\n",lcddev.dir,input_x,input_y);
 				//if(input_x >= touch_w || input_y >= touch_h){
@@ -120,6 +130,7 @@ void touch_read_point(void)
     }
     pre_touch = touch_num;
 }
+
 /**********************************************************************************************************/
 void TIM8_Config(uint32_t freq)
 {
@@ -185,14 +196,21 @@ STATIC mp_obj_t touch_Ft54xx_read(void)
 {
 	mp_obj_t tuple[3];
 	touch_read_point();
-	if (tp_dev.sta&TP_PRES_DOWN) tuple[0] = mp_obj_new_int(0);
-	else if(tp_dev.sta&TP_PRES_MOVE)	tuple[0] = mp_obj_new_int(1); 
-	else 	tuple[0] = mp_obj_new_int(2); 
-		
+
+	if (tp_dev.sta & TP_PRES_DOWN)
+		tuple[0] = mp_obj_new_int(0);
+	else if(tp_dev.sta & TP_PRES_MOVE)
+		tuple[0] = mp_obj_new_int(1); 
+	else
+		tuple[0] = mp_obj_new_int(2); 
+
 	tuple[1] = mp_obj_new_int(tp_dev.x[0]);
 	tuple[2] = mp_obj_new_int(tp_dev.y[0]);
 	return mp_obj_new_tuple(3, tuple);
-}STATIC MP_DEFINE_CONST_FUN_OBJ_0(touch_Ft54xx_read_obj, touch_Ft54xx_read);
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(touch_Ft54xx_read_obj, touch_Ft54xx_read);
+
 //------------------------------------------------------------------------------------------------------
 STATIC mp_obj_t touch_ft54xx_scan(void)
 {
@@ -219,23 +237,23 @@ STATIC mp_obj_t touch_tf54x6_make_new(const mp_obj_type_t *type, size_t n_args, 
 		tp_dev.dir = args[0].u_int;
 	//}
 	
-	switch (tp_dev.dir)
+	switch (1) //tp_dev.dir)
 	{
 		case 2:
-		touch_w=480;
-		touch_h=800;
+		touch_w=Y_PIXEL;
+		touch_h=X_PIXEL;
 		break;
 		case 3:
-		touch_w=800;
-		touch_h=480;
+		touch_w=X_PIXEL;
+		touch_h=Y_PIXEL;
 		break;
 		case 4:
-		touch_w=480;
-		touch_h=800;
+		touch_w=Y_PIXEL;
+		touch_h=X_PIXEL;
 		break;
 		case 1:
-		touch_w=800;
-		touch_h=480;
+		touch_w=X_PIXEL;
+		touch_h=Y_PIXEL;
 		break;
 	}
 

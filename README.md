@@ -278,9 +278,18 @@ button_lvgl.py # example: a LVGL-button. it uses lvgl_start.py to configure & ru
 
 more about micropython-LVGL
 ---------------------------
+* <root>/lib/lv_bindings/examples
 * https://github.com/lvgl/lv_binding_micropython
 * https://blog.lvgl.io/2019-02-20/micropython-bindings
 * https://blog.lvgl.io/2019-08-05/micropython-pure-display-driver
+
+*to batch upload many files to micropython device or do some other things use `mpfshell`:
+
+https://github.com/wendlers/mpfshell
+```
+python3 -m pip install mpfshell
+```
+some example is here: `examples-tk499-lvgl\`
 
 
 [![CI badge](https://github.com/micropython/micropython/workflows/unix%20port/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![Coverage badge](https://coveralls.io/repos/micropython/micropython/badge.png?branch=master)](https://coveralls.io/r/micropython/micropython?branch=master)

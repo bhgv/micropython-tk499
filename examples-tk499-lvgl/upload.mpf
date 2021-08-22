@@ -1,0 +1,5 @@
+lpwd Script to upload examples using mpfshell
+
+put lvgl_start.py
+put btn.py
+ls

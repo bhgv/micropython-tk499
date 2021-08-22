@@ -1,3 +1,7 @@
+#SCREEN_W = 854
+SCREEN_W = 800
+SCREEN_H = 480
+
 # lcd
 import tftlcd
 
@@ -19,14 +23,14 @@ lvlcd.init()
 
 # reg lvgl screen buffer
 disp_buf1 = lv.disp_draw_buf_t()
-buf1_1 = bytes(800*10)
-disp_buf1.init(buf1_1, None, len(buf1_1)//4)
+buf1_1 = bytes(SCREEN_W * SCREEN_H)
+disp_buf1.init(buf1_1, None, len(buf1_1) // 4)
 disp_drv = lv.disp_drv_t()
 disp_drv.init()
 disp_drv.draw_buf = disp_buf1
 disp_drv.flush_cb = lvlcd.flush
-disp_drv.hor_res = 800
-disp_drv.ver_res = 480
+disp_drv.hor_res = SCREEN_W
+disp_drv.ver_res = SCREEN_H
 disp_drv.register()
 
 # reg touchscreen

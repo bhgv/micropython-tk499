@@ -1,6 +1,8 @@
 #include "py/runtime.h"
 #include "py/mphal.h"
 #include "softtimer.h"
+#include <stdio.h>
+#include <malloc.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "../../../lib/lv_bindings/lvgl/lvgl.h"
@@ -36,7 +38,7 @@ STATIC mp_obj_t mp_lvlcd_framebuffer(mp_obj_t n_obj) {
 STATIC mp_obj_t mp_lvlcd_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_w, ARG_h };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_w, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 800} },
+        { MP_QSTR_w, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 854} },
         { MP_QSTR_h, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 480} },
     };
 
@@ -75,42 +77,78 @@ STATIC mp_obj_t mp_lvlcd_deinit() {
     return mp_const_none;
 }
 
-STATIC void mp_lvlcd_flush(struct _disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 
+STATIC void mp_lvlcd_flush(struct _lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
+{
 	int32_t x;
 	int32_t y;
 
-	for(y = area->y1; y <= area->y2 && y < disp_drv->ver_res; y++){
-		for(x = area->x1; x <= area->x2; x++){
-			LCD_Fast_DrawPoint(x,y,lv_color_to32(*color_p));
-			//LTDC_Buf[lcddev.x_pixel*y+x] = lv_color_to32(*color_p);
+#if 0 //{}
+	int i, j;
+	size_t h = area->y2 - area->y1 + 1;
+	size_t w = area->x2 - area->x1 + 1;
+	size_t h_bytes = h * sizeof(lv_color_t);
+
+	for (i = 0; i < w; i++) {
+		for (j = 0; j < h; j++) {
+			T[i * h + j] = color_p[j * w + i];
+		}
+	}
+
+	size_t hdst = lcddev.x_pixel;
+
+	lv_color_t *p = color_p;
+	//lv_color_t *pdst = (lv_color_t*)&(LTDC_Buf[area->x1 * Y_PIXEL]);
+	y = area->y1;
+
+	for (i = 0, x = area->x1; x <= area->x2; x++, i++) {
+		printf("[x(%d) * hdst(%d)], &p[i(%d) * h(%d)], h_bytes(%d)\n",
+			x, hdst, i, h, h_bytes);
+		memcpy(&LTDC_Buf[x * hdst + y], &p[i * h], h_bytes);
+		//p += h;
+		//pdst += Y_PIXEL;
+	}
+#else
+	for (y = area->y1; y <= area->y2 && y < disp_drv->ver_res; y++) {
+		for (x = area->x1; x <= area->x2; x++) {
+			//LCD_Fast_DrawPoint(x, y, lv_color_to32(*color_p));
+			LCD_Fast_DrawPoint(x, y, *((uint32_t*)color_p));
+//			LTDC_Buf[lcddev.x_pixel * y + x] = lv_color_to32(*color_p);
+//			LTDC_Buf[lcddev.y_pixel * x + y] = lv_color_to32(*color_p);
 			color_p++;
 		}
 	}
+#endif
+
+	//printf("%s> %s:%d\n", __FILE__, __func__, __LINE__);
 	lv_disp_flush_ready(disp_drv);
 }
 
 STATIC bool mp_lv_touch_read(struct _lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
-    static lv_coord_t lastX = 0;
-    static lv_coord_t lastY = 0;
+	static lv_coord_t lastX = 0;
+	static lv_coord_t lastY = 0;
 
-		// if(tp_dev.type == 1){
-			// touch_read_point();
-		// }else if(tp_dev.type == 2){
-			// gt911_read_point();
-		// }
-		if(tp_dev.sta&TP_PRES_DOWN || tp_dev.sta&TP_PRES_MOVE)
-		{
-			lastX = tp_dev.x[0];
-			lastY = tp_dev.y[0];
-			data->state = LV_INDEV_STATE_PR;
-			// printf("lastX:%d,lastY:%d\r\n",lastX,lastY);
-		}else{
-			data->state = LV_INDEV_STATE_REL;
-		}
-		data->point.x = lastX;
-		data->point.y = lastY;
-    return false;
+	touch_read_point();
+
+	//printf("%s> %s:%d tp_dev.sta=%d\n", __FILE__, __func__, __LINE__, tp_dev.sta);
+
+	// if(tp_dev.type == 1){
+		// touch_read_point();
+	// }else if(tp_dev.type == 2){
+		// gt911_read_point();
+	// }
+	if(tp_dev.sta & TP_PRES_DOWN || tp_dev.sta & TP_PRES_MOVE)
+	{
+		lastX = tp_dev.x[0];
+		lastY = tp_dev.y[0];
+		data->state = LV_INDEV_STATE_PR;
+		//printf("lastX: %d, lastY: %d\r\n", lastX, lastY);
+	}else{
+		data->state = LV_INDEV_STATE_REL;
+	}
+	data->point.x = lastX;
+	data->point.y = lastY;
+	return false;
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lvlcd_init_obj, 0, mp_lvlcd_init);

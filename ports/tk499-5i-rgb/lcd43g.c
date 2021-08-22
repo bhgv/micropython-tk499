@@ -638,7 +638,7 @@ void lcd43g_init(void)
 	lcddev.height = Y_PIXEL; //800;
 	lcddev.backcolor = BLACK;
 	
-	for(uint32_t i=0; i < lcddev.width*lcddev.height; i++){
+	for(uint32_t i=0; i < lcddev.width * lcddev.height; i++){
 		LTDC_Buf[i] = 0x0U;
 	}
 	mp_hal_pin_high(MICROPY_HW_LTDC_BL);
