@@ -1,44 +1,68 @@
+
 #SCREEN_W = 854
 SCREEN_W = 800
 SCREEN_H = 480
 
-# lcd
-import tftlcd
 
-d = tftlcd.LCD43R()  #Build LCD object
-d.fill((0, 0, 0))    #fill bkgnd
+global SCREEN_INITED
+global LVGL_INITED
 
-# touchscreen
-import touch
+if not ('SCREEN_INITED' in globals()):
+    SCREEN_INITED = False
+    print("ok1")
 
-t = touch.FT5436()   #Build a touch screen object
-#t.read()            #Get touch status and coordinates 
+if not ('LVGL_INITED' in globals()):
+    LVGL_INITED = False
+    print("ok2")
 
-# LVGL
 import lvgl as lv
-lv.init()
 
-import lvlcd
-lvlcd.init()
+if not SCREEN_INITED:
+    # lcd
+    import tftlcd
 
-# reg lvgl screen buffer
-disp_buf1 = lv.disp_draw_buf_t()
-buf1_1 = bytes(SCREEN_W * SCREEN_H)
-disp_buf1.init(buf1_1, None, len(buf1_1) // 4)
-disp_drv = lv.disp_drv_t()
-disp_drv.init()
-disp_drv.draw_buf = disp_buf1
-disp_drv.flush_cb = lvlcd.flush
-disp_drv.hor_res = SCREEN_W
-disp_drv.ver_res = SCREEN_H
-disp_drv.register()
+    d = tftlcd.LCD43R()  #Build LCD object
+    d.fill((0, 0, 0))    #fill bkgnd
 
-# reg touchscreen
-indev_drv = lv.indev_drv_t()
-indev_drv.init() 
-indev_drv.type = lv.INDEV_TYPE.POINTER
-indev_drv.read_cb = lvlcd.ts_read
-indev_drv.register()
+    # touchscreen
+    import touch
+
+    t = touch.FT5436()   #Build a touch screen object
+    #t.read()            #Get touch status and coordinates 
+
+    SCREEN_INITED = True
+
+if not LVGL_INITED:
+    # LVGL
+    lv.init()
+
+    import lvlcd
+    lvlcd.init()
+
+    # reg lvgl screen buffer
+    disp_buf1 = lv.disp_draw_buf_t()
+
+    buf1_1 = bytes(SCREEN_W * SCREEN_H * lv.color_t.__SIZE__)
+    disp_buf1.init(buf1_1, None, len(buf1_1) // 4)
+
+    #buf1_1 = bytearray(SCREEN_W * 50 * lv.color_t.__SIZE__)
+    #buf1_2 = bytearray(SCREEN_W * 50 * lv.color_t.__SIZE__)
+    #disp_buf1.init(buf1_1, buf1_2, len(buf1_1) // lv.color_t.__SIZE__)
+
+    disp_drv = lv.disp_drv_t()
+    disp_drv.init()
+    disp_drv.draw_buf = disp_buf1
+    disp_drv.flush_cb = lvlcd.flush
+    disp_drv.hor_res = SCREEN_W
+    disp_drv.ver_res = SCREEN_H
+    disp_drv.register()
+
+    # reg touchscreen
+    indev_drv = lv.indev_drv_t()
+    indev_drv.init() 
+    indev_drv.type = lv.INDEV_TYPE.POINTER
+    indev_drv.read_cb = lvlcd.ts_read
+    indev_drv.register()
 
 # define main loop class
 
@@ -62,7 +86,8 @@ class event_loop():
 
     def __init__(self, freq=25, timer_id=default_timer_id, max_scheduled=2, refresh_cb=None, asynchronous=False):
         if self.is_running():
-            raise RuntimeError("Event loop is already running!")
+            #raise RuntimeError("Event loop is already running!")
+            return
 
         if not lv.is_initialized():
             lv.init()

@@ -1,4 +1,4 @@
-from lvgl_start import event_loop
+from lv_utils import event_loop
 import lvgl as lv
 
 # Draw a button
