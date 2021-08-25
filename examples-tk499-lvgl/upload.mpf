@@ -6,6 +6,7 @@ put ex1.py
 put ex2.py
 put ex3.py
 put adv.py
+put cstm_ex.py
 put blue_flower_32.bin
 put png_decoder_test.png
 ls
