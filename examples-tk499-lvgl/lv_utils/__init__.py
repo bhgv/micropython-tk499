@@ -1,4 +1,3 @@
-
 #SCREEN_W = 854
 SCREEN_W = 800
 SCREEN_H = 480
@@ -6,6 +5,7 @@ SCREEN_H = 480
 
 global SCREEN_INITED
 global LVGL_INITED
+global EVENT_LOOP_RUNING
 
 if not ('SCREEN_INITED' in globals()):
     SCREEN_INITED = False
@@ -156,3 +156,58 @@ class event_loop():
             lv.tick_inc(self.delay)
             self.refresh_event.set()
 
+if not ('EVENT_LOOP_RUNING' in globals()):
+    EVENT_LOOP_RUNING = False
+    #if not event_loop.is_running():
+    event_loop()
+
+#global scr
+
+pages_stack = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0",]
+pages_stack_i = 0
+
+def do_ld_page(p):
+    print(p)
+    if p == "":
+        return
+    with open(p) as f:
+        code = compile(f.read(), p, 'exec')
+        exec(code, globals()) #, locals())
+
+def back_cb(e):
+    global pages_stack, pages_stack_i
+    if e.get_code() ==  lv.EVENT.CLICKED:
+        if pages_stack_i <= 0:
+            pages_stack_i = 0
+            return
+        pages_stack_i = pages_stack_i - 1
+        print(pages_stack_i)
+        if pages_stack_i > 0:
+            p = pages_stack[pages_stack_i - 1]
+            #
+            scr = lv.obj()
+            btn = lv.btn(scr)
+            btn.align(lv.ALIGN.BOTTOM_RIGHT, -30, -30)
+            btn.add_event_cb(back_cb, lv.EVENT.ALL, None)
+            label = lv.label(btn)
+            label.set_text("<<<")
+            lv.scr_load(scr)
+            #
+            do_ld_page(p)
+
+def ex_new_page(path):
+    global pages_stack, pages_stack_i
+    #print(pages_stack_i, pages_stack)
+    pages_stack[pages_stack_i] = path
+    pages_stack_i = pages_stack_i + 1
+    scr = lv.obj()
+    btn = lv.btn(scr)
+    btn.align(lv.ALIGN.BOTTOM_RIGHT, -30, -30)
+    btn.add_event_cb(back_cb, lv.EVENT.ALL, None)
+    label = lv.label(btn)
+    label.set_text("<<<")
+    lv.scr_load(scr)
+    #
+    do_ld_page(path)
+
+ex_new_page("")

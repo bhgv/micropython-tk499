@@ -64,4 +64,4 @@ spin.align(lv.ALIGN.CENTER, 0, 0)
 # spin.set_type(lv.spinner.TYPE.FILLSPIN_ARC)
 
 
-event_loop()
+#event_loop()

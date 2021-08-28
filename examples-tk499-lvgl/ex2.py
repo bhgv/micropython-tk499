@@ -10,7 +10,7 @@ import lodepng as png
 import lvgl as lv
 from lv_utils import event_loop
 
-event_loop()
+#event_loop()
 
 #lv.init()
 #lv.log_register_print_cb(lambda msg: print('%s' % msg))

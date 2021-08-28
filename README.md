@@ -289,7 +289,15 @@ https://github.com/wendlers/mpfshell
 ```
 python3 -m pip install mpfshell
 ```
-some example is here: `examples-tk499-lvgl\`
+some example is here: `examples-tk499-lvgl\`.
+
+you may use script `upfs.sh` to upload them all and make a kind of wrapper to browse examples
+```
+cd examples-tk499-lvgl
+./upfs.sh
+```
+this operation may take a long time due to the slow connection. and it may need to be rerunned/reuploaded several times. the connection is not very good 
+
 
 
 [![CI badge](https://github.com/micropython/micropython/workflows/unix%20port/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![Coverage badge](https://coveralls.io/repos/micropython/micropython/badge.png?branch=master)](https://coveralls.io/r/micropython/micropython?branch=master)

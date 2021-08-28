@@ -14,7 +14,7 @@ def mp_trace(frame, event, arg):
 #sys.settrace(mp_trace)
 
 import lvgl as lv
-from lv_utils import event_loop
+import lv_utils
 
 # lvgl must be initialized before any lvgl function is called or object/struct is constructed!
 
@@ -310,7 +310,7 @@ class AdvancedDemoApplication:
 app = AdvancedDemoApplication()
 app.init_gui()
 
-event_loop()
+#event_loop()
 
 # if __name__ == '__main__':
 #    while True:

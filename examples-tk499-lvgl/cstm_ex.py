@@ -11,7 +11,7 @@ sys.path.append('') # See: https://github.com/micropython/micropython/issues/641
 import lvgl as lv
 #import display_driver
 
-from lv_utils import event_loop
+import lv_utils
 
 #lv.init()
 
@@ -253,5 +253,3 @@ def event_cb(e):
 for widget in [btn, customWidget]:
     widget.add_event_cb(event_cb, lv.EVENT.CLICKED, None)
 
-
-event_loop()

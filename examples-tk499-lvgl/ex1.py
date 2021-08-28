@@ -4,7 +4,7 @@ import usys as sys
 sys.path.append('') # See: https://github.com/micropython/micropython/issues/6419
 
 import lvgl as lv
-from lv_utils import event_loop
+import lv_utils
 
 #lv.init()
 
@@ -37,4 +37,3 @@ img.set_src(img_dsc)
 
 lv.scr_load(scr)
 
-event_loop()
